@@ -1,0 +1,429 @@
+<div class="container-fluid">
+  <div class="header-body">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-xl-7"></div>
+        <div class="col-xl-4">
+          <div class="row">
+            <div class="col-xl-3" id="settings_div">
+              {% if settings_list %}
+              <select style="float:right; height:100%;margin-left:3px;" class="select_box" id="settings_box">
+              </select>
+              {% endif %}
+            </div>
+            <div class="col-xl-3" id="quiz_video_div">
+              {% if settings_list %}
+              <select style="float:right; height:100%;margin-left:3px;" class="select_box" id="quiz_video_box">
+                <option value="all">전체</option>
+              </select>
+              {% endif %}
+            </div>
+            <div class="col-xl-3">
+              <input id="fromDate" style="float:right; height:100%;margin-left:3px;" class="datepicker"
+                data-date-end-date="0d">
+            </div>
+            <div class="col-xl-3">
+              <input id="toDate" style="float:right; height:100%; margin-left:3px;" class="datepicker"
+                data-date-format="mm/dd/yyyy" disabled>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-1">
+          <button id="btn_search">검색</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Card stats -->
+  <div class="row" id="settings_summary">
+  </div>
+</div>
+<br>
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col-xl-6 mb-5 mb-xl-0">
+      <div class="card bg-gradient-default shadow">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="text mb-0">일별 광고 현황</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Chart -->
+          <div class="chart">
+            <!-- Chart wrapper -->
+            <canvas id="chart_user" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card shadow">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <div class="col">
+              <h6 class="text-uppercase text-muted ls-1 mb-1"></h6>
+              <h2 class="mb-0">연령 타겟 분포</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Chart -->
+          <div class="chart">
+            <canvas id="matched_age" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="/" class="float">
+    <i class="fa fa-plus my-float">MAIN</i>
+  </a>
+</div>
+<br>
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col-xl-6 mb-5 mb-xl-0">
+      <div class="card bg-gradient-default shadow">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="text mb-0">관심사 분포</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Chart -->
+          <div class="chart">
+            <!-- Chart wrapper -->
+            <canvas id="matched_interest" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card shadow">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <div class="col">
+              <h6 class="text-uppercase text-muted ls-1 mb-1"></h6>
+              <h2 class="mb-0">지역 분포 </h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Chart -->
+          <div class="chart">
+            <canvas id="matched_location" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="/" class="float">
+    <i class="fa fa-plus my-float">MAIN</i>
+  </a>
+</div>
+
+<script>
+  $(document).ready(function () {
+    var getDaysArray = function (s, e) { for (var a = [], d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) { a.push(datestring(new Date(d))); } return a; };
+    var datestring = function (d) { return (d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate()) };
+    var user_canvas = null;
+    var matched_canvas = [];
+
+    // settings datepicker
+    var toDate = new Date();
+    var fromDate = new Date();
+    fromDate.setDate(toDate.getDate() - 13);
+
+    $('#fromDate').datepicker("setDate", fromDate);
+    $('#fromDate').datepicker().on('changeDate', function (e) {
+      var date = new Date(e.date);
+      date.setDate(date.getDate() + 14);
+      if (date > toDate) date = toDate
+      $("#toDate").datepicker("setDate", date)
+
+    });
+    $("#toDate").datepicker("setDate", toDate);
+
+    // setting select boxes
+    $.ajax({
+      type: 'post',
+      url: "{% url 'custom_get_settings'%}",
+      success: function (response) {
+        $('#settings_box').append(response);
+      }, error: function (jqXHR, textStatus, errorThrown) {
+        console.error("get_settings error thrown");
+      }
+    }).done(function (data) {
+      if (data) {
+        var settings_id = $('#settings_box').val();
+        set_quiz_video_box(settings_id);
+        set_summary(settings_id);
+
+        var start = $('#fromDate').datepicker('getDate');
+        var end = $('#toDate').datepicker('getDate');
+        user_chart(start, end);
+        doughnut_chart(start, end);
+      } else {
+        set_summary(-1);
+      }
+    });
+
+    // quiz_box changes when setting changes
+    $('#settings_box').on('change', function () {
+      set_quiz_video_box(this.value);
+    });
+
+    // get the quiz_video_list
+    var set_quiz_video_box = function (settings_id) {
+      if ($('#quiz_video_box')) $('#quiz_video_box').empty();
+      $.ajax({
+        type: 'post',
+        url: "{% url 'custom_get_quiz_video_info'%}",
+        data: {
+          'settings_id': settings_id
+        },
+        success: function (response) {
+          $('#quiz_video_box').append('<option val="all">전체</option>')
+          $('#quiz_video_box').append(response);
+        }, error: function (jqXHR, textStatus, errorThrown) {
+          console.log(jqXHR.responseText);
+        }
+      })
+    }
+
+    // setting summary
+    var set_summary = function (settings_id) {
+      $('#settings_summary').empty();
+      $.ajax({
+        type: 'post',
+        url: "{% url 'custom_get_settings_summary'%}",
+        data: {
+          'settings_id': settings_id
+        },
+        success: function (response) {
+          $('#settings_summary').append(response);
+        }, error: function (jqXHR, textStatus, errorThrown) {
+          console.log(jqXHR.responseText);
+        }
+      })
+    }
+
+    ////////////////////////////
+    var user_chart = function (start, end) {
+      if (user_canvas != null) user_canvas.destroy();
+      var ctx = document.getElementById('chart_user').getContext('2d');
+      var color = Chart.helpers.color;
+      var chart_labels = getDaysArray(start, end);
+      var sub_menus = [];
+      var data_set = [];
+      var chart_data_set = [];
+      // var start_dt = $('#fromDate').val();
+      // var end_dt = $('#toDate').val();
+      $.ajax({
+        type: 'post',
+        url: "{% url 'custom_get_settings_data'%}",
+        data: {
+          'settings_id': $('#settings_box').val(),
+          'start_dt': $.datepicker.formatDate("yy-mm-dd", start),
+          'end_dt': $.datepicker.formatDate("yy-mm-dd", end)
+        },
+        success: function (data, status, xhr) {
+          if (data.quiz_list) {
+            data.quiz_list.forEach(function (item) {
+              sub_menus.push(item.id);
+            });
+          }
+          for (var i = 0; i < sub_menus.length; i++) {
+            var sub_data_set = [];
+            for (var j = 0; j < chart_labels.length; j++) {
+              var settings_data = data.settings_data;
+              if (settings_data) {
+                var filtered = settings_data.filter(function (event) {
+                  return event.quiz_id == sub_menus[i] & event.date_at == chart_labels[j];
+                });
+                if (filtered.length > 0) {
+                  sub_data_set.push(filtered[0].tot_cnt);
+                } else {
+                  sub_data_set.push(0);
+                }
+              }
+            }
+            data_set.push(sub_data_set);
+          }
+
+          sub_menus.forEach(function (item, i) {
+            var json_data = {
+              label: sub_menus[i],
+              backgroundColor: color(Charts.chartColors[Charts.colors_list[i]]).alpha(0.5).rgbString(),
+              borderColor: color(Charts.chartColors[Charts.colors_list[i]]),
+              borderWitdth: 1,
+              data: data_set[i]
+            }
+            chart_data_set.push(json_data);
+          });
+
+          var horizontalBarChartData = {
+            labels: chart_labels,
+            datasets: chart_data_set
+          };
+
+          user_canvas = new Chart(ctx, {
+            type: 'bar',
+            data: horizontalBarChartData,
+            options: {
+              showTooltips: true,
+              tooltips: {
+                callbacks: {
+                  label: function (item, data) {
+                    var label = data.datasets[item.datasetIndex].label || '';
+                    var yLabel = item.yLabel;
+                    var content = '';
+
+                    if (data.datasets.length > 1) {
+                      content += '<span class="popover-body-label mr-auto">' + label + '</span>';
+                    }
+
+                    content += '<span class="popover-body-value">' + ' : ' + yLabel + '</span>';
+
+                    return content;
+                  }
+                }
+              },
+              elements: {
+                rectangle: {
+                  borderWidth: 2,
+                }
+              },
+              responsive: true,
+              legend: {
+                display: true,
+                position: 'right',
+              },
+            }
+          });
+        }, error: function (jqXHR, textStatus, errorThrown) {
+          console.log(jqXHR.responseText);
+        }
+      });
+    };
+
+    var doughnut_chart = function (start, end) {
+      $.ajax({
+        type: 'post',
+        url: "{% url 'custom_get_matched_data'%}",
+        data: {
+          'settings_id': $('#settings_box').val(),
+          'start_dt': $.datepicker.formatDate("yy-mm-dd", start),
+          'end_dt': $.datepicker.formatDate("yy-mm-dd", end)
+        },
+        success: function (data, status, xhr) {
+          var doughnut_chart_list = ['matched_age', 'matched_interest', 'matched_location'];
+          var doughnut_chart_title = ['연령별 분포', '관심사별 분포', '지역별 분포'];
+          var doughnut_chart_labels = {
+            'matched_age': [],
+            'matched_interest': [],
+            'matched_location': [],
+          }
+
+          var chart_type = {
+            'matched_age': 'pie',
+            'matched_interest': 'doughnut',
+            'matched_location': 'pie'
+          }
+
+          var doughnut_chart_data = {
+            'matched_age': [],
+            'matched_interest': [],
+            'matched_location': [],
+          }
+
+          data.matched_age.forEach(function (item) {
+            doughnut_chart_labels['matched_age'].push(item.matched_age);
+            doughnut_chart_data['matched_age'].push(item.tot_cnt);
+          });
+
+          // data.matched_gender.forEach(function(item){
+          //   doughnut_chart_labels['matched_gender'].push(item.matched_gender);
+          //   doughnut_chart_data['matched_gender'].push(item.tot_cnt);
+          // });
+
+          data.matched_interest.forEach(function (item) {
+            doughnut_chart_labels['matched_interest'].push(item.matched_interest);
+            doughnut_chart_data['matched_interest'].push(item.tot_cnt);
+          });
+
+          data.matched_location.forEach(function (item) {
+            doughnut_chart_labels['matched_location'].push(item.matched_location);
+            doughnut_chart_data['matched_location'].push(item.tot_cnt);
+          });
+          
+          if(matched_canvas.length>0){
+            matched_canvas.forEach(function(item){
+              item.destroy();
+            });
+          }
+
+          doughnut_chart_list.forEach(function (item) {
+            var ctx = document.getElementById(item).getContext('2d');
+            matched_canvas.push(new Chart(ctx, {
+              type: chart_type[item],
+              data: {
+                labels: doughnut_chart_labels[item],
+                datasets: [{
+                  data: doughnut_chart_data[item],
+                  backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                  ],
+                  borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                  ],
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                legend: {
+                  display: true,
+                  labels: {
+                    fontColor: 'black'
+                  },
+                  position: 'right'
+                },
+                title: doughnut_chart_title[item]
+              }
+            }));
+          });
+        }
+      });
+    };
+
+    // search button binding
+    $('#btn_search').on('click', function () {
+      var start = $('#fromDate').datepicker('getDate');
+      var end = $('#toDate').datepicker('getDate');
+      var settings_id = $('#settings_box').val();
+      var quiz_video_id = $('#quiz_video_box').val();
+
+      // commercial_info(settings_id, quiz_video_id, start, end);
+      set_summary(settings_id);
+      user_chart(start, end);
+      doughnut_chart(start, end);
+
+    });
+
+  });
+</script>

@@ -1,0 +1,67 @@
+{% load static %}
+{% block indexHead %}
+<head>
+<!--    MOBILE FRIENDLY-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!--    BOOTSTRAP & JQUERY & FONTAWESOME -->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <script src="{% static 'bootstrap/js/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<!--    TOASTR -->
+    <link rel="stylesheet" type="text/css" href="{% static 'toastr/toastr.css' %}" media="all">
+    <script type="text/javascript" src="{% static 'toastr/toastr.min.js' %}"></script>
+
+<!--    MAIN CSS-->
+    <link rel="stylesheet" href="{% static 'index/css/index.css' %}">
+
+<!--    FILEUPLOAD-->
+    <script src="{% static 'fileupload/jquery.extend.js' %}"></script>
+    <script src="{% static 'fileupload/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'fileupload/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'fileupload/jquery.fileupload.js' %}"></script>
+</head>
+{% endblock %}
+{% block head %}{% endblock %}
+<body class="d-flex flex-column">
+    {% include 'index/message.html' %}
+    {% block nav %}
+        {% include 'index/navs/default/nav.html' %}
+    {% endblock %}
+    <div id="flex-wrap">
+        {% block content %}
+            {% if not user.is_authenticated %}
+                {% include 'index/forms/signin/form.html' %}
+            {% elif request.target == 'custom' %}
+                {% include 'dashboard/custom.html' with settings_list=settings_list%}
+            {% else %}
+                {% include 'dashboard/index.html' %}
+            {% endif %}
+            
+        {% endblock %}
+        {% block footer %}
+                {% include 'index/footers/default/footer.html' %}
+        {% endblock %}
+    </div>
+</body>
+{% block javascript %}{% endblock %}
+<script>
+$.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+        }
+    }
+});
+$(document).ready(function(){})
+</script>
+
+
+

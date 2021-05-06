@@ -1,0 +1,123 @@
+<div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body">
+      <!-- Card stats -->
+      <div class="row">
+        <div class="col-xl-3 col-lg-6">
+          <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
+                  <h5 class="card-title text-uppercase text-muted mb-0">앱 방문 수</h5>
+                  <span class="h2 font-weight-bold mb-0" id="login_user_tab"></span>
+                </div>
+                <div class="col-auto">
+                  <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                    <i class="fa fa-chart-bar"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
+                <span class="text-nowrap">Since last month</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+          <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
+                  <h5 class="card-title text-uppercase text-muted mb-0">새 사용자</h5>
+                  <span class="h2 font-weight-bold mb-0" id="new_user_tab"></span>
+                </div>
+                <div class="col-auto">
+                  <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                    <i class="fa fa-chart-pie"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-danger mr-2"><i class="fa fa-arrow-down"></i> 3.48%</span>
+                <span class="text-nowrap">Since last week</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+          <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
+                  <h5 class="card-title text-uppercase text-muted mb-0">금일 상금 현황</h5>
+                  <span class="h2 font-weight-bold mb-0" id="reward_tab"></span>
+                </div>
+                <div class="col-auto">
+                  <div class="icon icon-shape bg-yellow text-white rounded-circle shadow">
+                    <i class="fa fa-users"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-warning mr-2"><i class="fa fa-arrow-down"></i> 1.10%</span>
+                <span class="text-nowrap">Since yesterday</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+          <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
+                  <h5 class="card-title text-uppercase text-muted mb-0">광고 현황</h5>
+                  <span class="h2 font-weight-bold mb-0" id="commercial_tab"></span>
+                </div>
+                <div class="col-auto">
+                  <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                    <i class="fa fa-percent"></i>
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 12%</span>
+                <span class="text-nowrap">Since last month</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+
+<script>
+  $(document).ready(function () {
+
+    var settings_init = function () {
+      $.ajax({
+        type: 'post',
+        url: "{% url 'index_get_settings'%}",
+        success: function (data) {
+
+          var login_info_cnt = data.login_info.length > 0 ? data.login_info[0].tot_cnt : 0;
+          var user_info_cnt = data.user_info.length > 0 ? data.user_info[0].tot_cnt : 0;
+          var reward_daily_cap = data.reward_cap_info.length > 0 ? data.reward_cap_info[0].daily_cap : 0;
+          var quiz_info_cnt = data.quiz_info.length > 0 ? data.quiz_info[0].tot_cnt : 0;
+          var video_info_cnt = data.video_info.length > 0 ? data.video_info[0].tot_cnt : 0;
+
+          $('#login_user_tab').html(login_info_cnt);
+          $('#new_user_tab').html(user_info_cnt);
+          $('#reward_tab').html("₩" + reward_daily_cap);
+          $('#commercial_tab').html(quiz_info_cnt + "/" + video_info_cnt);
+
+        }, error: function (jqXHR, textStatus, errorThrown) {
+          console.error("get_settings error thrown");
+        }
+      });
+    }();
+
+  });
+</script>

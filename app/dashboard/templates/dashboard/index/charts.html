@@ -1,0 +1,254 @@
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col-xl-6 mb-5 mb-xl-0">
+      <div class="card bg-gradient-default shadow">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="text mb-0">CATCHYA 유저 현황</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Chart -->
+          <div class="chart">
+            <!-- Chart wrapper -->
+            <canvas id="chart_user" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card shadow">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <div class="col">
+              <h6 class="text-uppercase text-muted ls-1 mb-1"></h6>
+              <h2 class="mb-0">상금 현황</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Chart -->
+          <div class="chart">
+            <canvas id="chart_traffic" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+
+<script>
+  $(document).ready(function () {
+    var init_data = (function () {
+      var datestring = function (d) { return (d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate()) };
+      var getDaysArray = function (s, e) { for (var a = [], d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) { a.push(datestring(new Date(d))); } return a; };
+      var format_date = function formatDate(date) {
+        var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear();
+
+        if (month.length < 2)
+          month = '0' + month;
+        if (day.length < 2)
+          day = '0' + day;
+
+        return [year, month, day].join('-');
+      }
+
+      // settings dates for uesr / traffic charts
+      var toDate = new Date();
+      var fromDate = new Date();
+      toDate.setDate(toDate.getDate() - 1);
+      fromDate.setDate(toDate.getDate() - 4);
+
+      var date_labels = getDaysArray(fromDate, toDate);
+      $.ajax({
+        type: 'post',
+        data: {
+          start_dt: format_date(fromDate),
+          end_dt: format_date(toDate),
+        },
+        url: "{% url 'index_get_chart_data'%}",
+        success: function (data) {
+          user_data = [];
+          reward_data = [];
+          prize_data = [];
+          var existing_user = data.existing_user;
+
+          date_labels.forEach(function (dt) {
+            var prize = 0;
+            var reward_cap = 0;
+
+            var user_filtered = data.user_info.filter(function (event) {
+              if (event.reg_at == dt) existing_user += event.tot_cnt
+            });
+
+            var quiz_filtered = data.quiz_info.filter(function (event) {
+              if (event.date_at == dt) prize += event.tot_reward
+            });
+            var video_filtered = data.video_info.filter(function (event) {
+              if (event.date_at == dt) prize += event.tot_reward
+            });
+
+            var reward_filtered = data.reward_cap_info.filter(function (event) {
+              if (event.date_at == dt) reward_cap += event.daily_cap
+            });
+
+            user_data.push(existing_user);
+            prize_data.push(prize);
+            reward_data.push(reward_cap);
+
+          });
+          var user_chart_data = {
+            'date_labels': date_labels,
+            'user_data': user_data
+          }
+          var traffic_chart_data = {
+            'date_labels': date_labels,
+            'prize_data': prize_data,
+            'reward_data': reward_data
+          }
+          user_chart(user_chart_data);
+          traffic_chart(traffic_chart_data);
+
+        }, error: function (jqXHR, textStatus, errorThrown) {
+          console.error("get_settings error thrown");
+        }
+      });
+
+    })();
+
+    var user_chart = function (user_chart_data) {
+      var ctx = document.getElementById('chart_user').getContext('2d');
+      var color = Chart.helpers.color;
+      var horizontalBarChartData = {
+        labels: user_chart_data.date_labels,
+        datasets: [
+          //   {
+          //   label: '열성유저',
+          //   backgroundColor: color(Charts.chartColors.red).alpha(0.5).rgbString(),
+          //   borderColor: Charts.chartColors.red,
+          //   borderWidth: 1,
+          //   data: [
+          //     Math.round(Math.random() * 100),
+          //     Math.round(Math.random() * 100),
+          //     Math.round(Math.random() * 100),
+          //     Math.round(Math.random() * 100),
+          //     Math.round(Math.random() * 100)
+          //   ]
+          // }, 
+          {
+            label: '총 유저',
+            backgroundColor: color(Charts.chartColors.blue).alpha(0.5).rgbString(),
+            borderColor: Charts.chartColors.blue,
+            borderWidth: 1,
+            data: user_chart_data.user_data
+          }]
+
+      };
+
+      window.myHorizontalBar = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: horizontalBarChartData,
+        options: {
+          showTooltips: true,
+          tooltips: {
+            callbacks: {
+              label: function (item, data) {
+                var label = data.datasets[item.datasetIndex].label || '';
+                var xLabel = item.xLabel;
+                var content = '';
+
+                if (data.datasets.length > 1) {
+                  content += '<span class="popover-body-label mr-auto">' + label + '</span>';
+                }
+
+                content += '<span class="popover-body-value">' + ' : ' + xLabel + '</span>';
+
+                return content;
+              }
+            }
+          },
+
+          // Elements options apply to all of the options unless overridden in a dataset
+          // In this case, we are setting the border of each horizontal bar to be 2px wide
+          elements: {
+            rectangle: {
+              borderWidth: 2,
+            }
+          },
+          responsive: true,
+          legend: {
+            display: true,
+            position: 'right',
+          },
+        }
+      });
+
+
+    }
+
+    var traffic_chart = function (traffic_chart_data) {
+      var $chart = $('#chart_traffic');
+      // Init chart
+      // Create chart
+      var traffic_chart = new Chart($chart, {
+        type: 'bar',
+        options: {
+          scales: {
+            yAxes: [{
+              gridLines: {
+                lineWidth: 1,
+                color: '#dfe2e6',
+                zeroLineColor: '#dfe2e6'
+              },
+              ticks: {
+                callback: function (value) {
+                  if (!(value % 10)) {
+                    //return '$' + value + 'k'
+                    return value
+                  }
+                }
+              }
+            }]
+          },
+          tooltips: {
+            callbacks: {
+              label: function (item, data) {
+                var label = data.datasets[item.datasetIndex].label || '';
+                var yLabel = item.yLabel;
+                var content = '';
+
+                if (data.datasets.length > 1) {
+                  content += '<span class="popover-body-label mr-auto">' + label + '</span>';
+                }
+
+                content += '<span class="popover-body-value">' + yLabel + '</span>';
+
+                return content;
+              }
+            }
+          }
+        },
+        data: {
+          labels: traffic_chart_data.date_labels,
+          datasets: [{
+            label: '상금 현황',
+            data: traffic_chart_data.reward_data,
+            type: 'line',
+            order: 1,
+          }, {
+            label: '상금 발생',
+            data: traffic_chart_data.prize_data,
+            order: 2,
+          }]
+        }
+      });
+    };
+  });
+
+</script>

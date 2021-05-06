@@ -1,0 +1,12 @@
+{% load static %}
+{% block content %}
+<script src="{% static 'dashboard/js/jquery-ui.min.js' %}"></script>
+<script src="{% static 'dashboard/js/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'dashboard/js/moment.js' %}"></script>
+<script src="{% static 'dashboard/js/Chart.min.js' %}"></script>
+<script src="{% static 'dashboard/js/datatables.min.js' %}"></script>
+<script src="{% static 'dashboard/js/chart_config.js' %}"></script>
+<link rel="stylesheet" href="{% static 'dashboard/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/bootstrap-datepicker.min.css' %}">
+{% include 'dashboard/custom/settings.html' with settings_list=settings_list %}
+{% endblock %}

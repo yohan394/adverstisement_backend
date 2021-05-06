@@ -1,0 +1,23 @@
+#sticky-footer {
+  flex-shrink: none;
+}
+
+.footer-bar {
+    position: fixed;
+    top: 90%;
+    right : 3%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+#icon-chat {
+    font-size : 20px;
+    color : floralwhite;
+}
+
+.footer-list {
+    position: relative;
+    top: 140;
+    left: 160%;
+}

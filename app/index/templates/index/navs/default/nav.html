@@ -1,0 +1,48 @@
+{% load static %}
+{% block head %}
+	<link rel="stylesheet" href="{% static 'index/css/navs/default/nav.css' %}">
+{% endblock %}
+<nav class="navbar navbar-expand-xl navbar-dark bg-casablanca">
+	<a href="{% url 'index' %}" class="navbar-brand"><i class="fa fa-cube"></i><b>TANGO</b> inc.</a>
+	<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<!-- Collection of nav links, forms, and other content for toggling -->
+	<div id="navbarCollapse" class="collapse navbar-collapse justify-content-start">
+		{% if user.is_authenticated %}
+		<form class="navbar-form form-inline">
+			<div class="input-group search-box">
+				<input type="text" id="search" class="form-control" placeholder="Search here...">
+				<span class="input-group-addon"><i class="fa fa-search"></i></span>
+			</div>
+		</form>
+		<div class="navbar-nav ml-auto">
+			<a href="#" class="nav-item nav-link"><i class="fa fa-envelope"></i><span>Contact</span></a>
+			<a href="#" class="nav-item nav-link"><i class="fa fa-briefcase"></i><span>Advertise</span></a>
+
+			<div class="nav-item dropdown">
+				<a href="#" data-toggle="dropdown" class="nav-item nav-link dropdown-toggle user-action">
+					{% if request.session.profile_pic %}
+						<img  src="{{ request.session.profile_pic }}" class="avatar" alt="Avatar">
+					{% else %}
+						<img  src="{% static 'index/images/default-user.png' %}" class="avatar" alt="Avatar">
+					{% endif %}
+					{% if request.session.fullname %}
+					{{ request.session.fullname }}
+					{% endif %}
+					<b class="caret"></b>
+				</a>
+				<div class="dropdown-menu">
+					<a href="{% url 'UpdateProfile' %}" class="dropdown-item"><i class="fa fa-user-o"></i> Profile</a>
+					<div class="divider dropdown-divider"></div>
+					<a href="{% url 'sign_out' %}" class="dropdown-item"><i class="material-icons"></i> Logout</a>
+				</div>
+			</div>
+		</div>
+		{% else %}
+		<div class="navbar-nav ml-auto">
+			<a href="#" class="nav-item nav-link active"><i class="fa fa-envelope"></i><span>CONTACT</span></a>
+		</div>
+		{% endif %}
+	</div>
+</nav>

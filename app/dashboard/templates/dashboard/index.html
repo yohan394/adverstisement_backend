@@ -1,0 +1,12 @@
+{% load static %}
+{% block content %}
+<script src="{% static 'dashboard/js/jquery-ui.min.js' %}"></script>
+<script src="{% static 'dashboard/js/moment.js' %}"></script>
+<script src="{% static 'dashboard/js/Chart.min.js' %}"></script>
+<script src="{% static 'dashboard/js/chart_config.js' %}"></script>
+<script src="{% static 'dashboard/js/datatables.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'dashboard/css/index.css' %}">
+{% include 'dashboard/index/settings.html' %}
+{% include 'dashboard/index/charts.html' %}
+{% include 'dashboard/index/commercials.html' %}
+{% endblock %}

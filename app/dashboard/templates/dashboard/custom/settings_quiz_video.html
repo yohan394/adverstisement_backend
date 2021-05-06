@@ -1,0 +1,10 @@
+{% if quiz_list%}
+{% for quiz in quiz_list %}
+<option value="q_{{ quiz.id }}">{{ quiz.title }}</option>
+{% endfor %}
+{% endif %}
+{% if video_list%}
+{% for video in videos_list %}
+<option value="v_{{ video.id }}">{{ video.title }}</option>
+{% endfor %}
+{% endif %}

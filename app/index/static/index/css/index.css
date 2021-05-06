@@ -1,0 +1,45 @@
+body {
+    overflow-x:hidden;
+}
+
+
+/* https://www.shutterstock.com/ko/blog/101-free-color-combinations-design-inspiration/amp/ : #84 */
+.bg-stormdust {
+  color: white;
+  background-color: #655C57;
+}
+
+.bg-mikado {
+  color: white;
+  background-color: #2E1E11;
+}
+
+.bg-tango {
+    color: white;
+    background-color: #EF6E2C;
+}
+
+.bg-casablanca {
+    color: white;
+    background-color: #F3B749;
+}
+
+.bg-sand {
+    background-color: #E4DACE;
+}
+
+.bg-medallion {
+    background-color: #E5BB4B;
+}
+
+.bg-alice-sand{
+    background-color: #E5EDF8;
+}
+
+.bg-birch{
+    background-color: #F2F4EF;
+}
+
+.bg-pinkred {
+    background-color: #AF8F90 !important;
+}

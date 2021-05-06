@@ -1,0 +1,312 @@
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col-lg-3 mb-5 mb-xl-0">
+      <div card class="shadow bg-gradient-default">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <h2 class="text mb-0">연령대 분포 현황</h2>
+            <div class="card-body">
+              <div>
+                <div class="chart">
+                  <canvas id="chart_age" class="chart-canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 mb-5 mb-xl-0">
+      <div class="card shadow bg-gradient-default">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <h2 class="text mb-0"> 관심사 현황</h2>
+            <div class="card-body">
+              <div>
+                <div class="chart">
+                  <canvas id="chart_interest" class="chart-canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 mb-5 mb-xl-0">
+      <div class="card shadow bg-gradient-default">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <h2 class="text mb-0">장소 분포 현황</h2>
+            <div class="card-body">
+              <div>
+                <div class="chart">
+                  <canvas id="chart_location" class="chart-canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 mb-5 mb-xl-0">
+      <div class="card shadow bg-gradient-default">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <h2 class="text mb-0">성별 분포 현황</h2>
+            <div class="card-body">
+              <div>
+                <div class="chart">
+                  <canvas id="chart_gender" class="chart-canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col-xl-12 mb-5 mb-xl-0">
+      <div class="card bg-gradient-default shadow">
+        <div class="card-header bg-transparent">
+          <div class="row align-items-center">
+            <div class="col">
+              <h2 class="text mb-0">CATCHYA 광고 타겟 검색(광고 가능한 타겟군을 검색해 보세요.)</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <dl class="dropdown">
+            <div class="row">
+              <div class="col-xl-2">
+                <dt>
+                  <a class="a_age" href="javascript:void(0);">
+                    <span class="hida_age">연령대</span>
+                    <p class="multiSel_age"></p>
+                  </a>
+                </dt>
+                <dd>
+                  <div class="mutliSelect_age">
+                    <ul class="ul_age">
+                    </ul>
+                </dd>
+              </div>
+              <div class="col-xl-2">
+                <dt>
+                  <a class="a_gender" href="javascript:void(0);">
+                    <span class="hida_gender">성별</span>
+                    <p class="multiSel_gender"></p>
+                  </a>
+                </dt>
+                <dd class="dd_gender">
+                  <div class="mutliSelect_gender">
+                    <ul class="ul_gender">
+                    </ul>
+                  </div>
+                </dd>
+              </div>
+              <div class="col-xl-2">
+                <dt>
+                  <a class="a_interest" href="javascript:void(0);">
+                    <span class="hida_interest">관심사</span>
+                    <p class="multiSel_interest"></p>
+                  </a>
+                </dt>
+                <dd class="dd_interest">
+                  <div class="mutliSelect_interest">
+                    <ul class="ul_interest">
+                    </ul>
+                  </div>
+                </dd>
+              </div>
+              <div class="col-xl-2">
+                <dt>
+                  <a class="a_location" href="javascript:void(0);">
+                    <span class="hida_location">지역</span>
+                    <p class="multiSel_location"></p>
+                  </a>
+                </dt>
+                <dd class="dd_location">
+                  <div class="mutliSelect_location">
+                    <ul class="ul_location">
+                    </ul>
+                  </div>
+                </dd>
+              </div>
+              <div class="col-xl-2">
+                <button id="pop_search" style="height:100%">검색</button>
+              </div>
+          </dl>
+          <br>
+          <br>
+          <br>
+          <br>
+          <div class="row">
+            <div class="col-xl-8">
+              <span id="search_txt"></span>
+            </div>
+            <br>
+            <br>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="/custom" class="float">
+      <i class="fa fa-plus my-float">CUSTOM</i>
+    </a>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+
+    var commercial_targets = ['age', 'gender', 'interest', 'location'];
+    var target_dict = {};
+    $.ajax({
+      url: "{% url 'index_get_initial_commercial_data' %}",
+      success: function (data) {
+        commercial_targets.forEach(function (target) {
+          $('.ul_' + target).empty();
+          if (data[target]) {
+            target_dict[target] = data[target];
+            data[target].forEach(function (item) {
+              $('.ul_' + target).append('<li><input type="checkbox" value="' + item[0] + '" />' + item[1] + '</li>');
+            });
+          }
+        });
+      },
+      error: function (e) { console.error(e); }
+    }).done(function (data) {
+      doughnut_chart(data.data);
+    })
+
+    commercial_targets.forEach(function (target) {
+      $(".a_" + target).on('click', function () {
+        $(".ul_" + target).slideToggle('fast');
+        $(".ul_" + target).css("z-index", 9999);
+      });
+
+      $('.mutliSelect_' + target + ' input[type="checkbox"]').on('click', function () {
+
+        var title = $(this).closest('.mutliSelect_' + target).find('input[type="checkbox"]').val(),
+          title = $(this).val() + ",";
+        if ($(this).is(':checked')) {
+          var html = '<span title="' + title + '">' + title + '</span>';
+          $('.multiSel_' + target).append(html);
+          $(".hida_" + target).hide();
+        } else {
+          $('span[title="' + title + '"]').remove();
+          var ret = $(".hida_" + target);
+          $('.dropdown dt .a_' + target).append(ret);
+
+        }
+      });
+    });
+
+    // searching specific population 
+    $('#pop_search').on('click', function () {
+      var target_data = {
+        age_list: [],
+        gender_list: [],
+        interest_list: [],
+        location_list: []
+      };
+      var any_target = ['A0', 'L0', 'NO', 'G0'];
+      commercial_targets.forEach(function (target) {
+        $('.mutliSelect_' + target).find('input[type="checkbox"]').each(function (item, i) {
+          if ($(this).is(':checked')) {
+            if (any_target.includes(i.value)) {
+              target_data[target + '_list'] = [];
+              return false;
+            }
+            target_data[target + '_list'].push(i.value);
+          }
+        });
+        // target_data[target + '_list'] = target_data[target + '_list'].join(",");
+      });
+
+      $.ajax({
+        url: "{% url 'index_get_commercial_search_data'%}",
+        type: 'post',
+        data: target_data,
+        success: function (data) {
+          $('#search_txt').html("조건에 맞는 유저 수는 " + data.targeted_count + "명입니다. ");
+          clear_search_options();
+        },
+        error: function (e) { console.error(e); }
+
+      });
+
+    });
+
+    var clear_search_options = function () {
+      $('.hida_age').css("display", "");
+      $('.hida_interest').css("display", "");
+      $('.multiSel_age').html("");
+      $('.multiSel_interest').html("");
+      $('input[type=checkbox]').prop('checked', false);
+    }
+
+
+    // doughnut charts
+    var doughnut_chart = function (chart_data) {
+      var color = Chart.helpers.color;
+
+      var doughnut_chart_list = ['chart_age', 'chart_interest', 'chart_location', 'chart_gender'];
+      var doughnut_chart_title = ['연령별 분포', '관심사별 분포', '지역별 분포', '성별 분포'];
+      var doughnut_chart_labels = {
+        'chart_age': [],
+        'chart_interest': [],
+        'chart_location': [],
+        'chart_gender': []
+      }
+      var doughnut_chart_data = {
+        'chart_age': [],
+        'chart_interest': [],
+        'chart_location': [],
+        'chart_gender': []
+      }
+      commercial_targets.forEach(function (target) {
+        chart_data[target].forEach(function (item) {
+          var filtered = target_dict[target].find((label) => { return label[0] == item[target] });
+          doughnut_chart_labels['chart_' + target].push(filtered[1]);
+          doughnut_chart_data['chart_' + target].push(item.tot_cnt);
+        });
+      });
+
+      doughnut_chart_list.forEach(function (item) {
+        var ctx = document.getElementById(item).getContext('2d');
+        var background_color_set = [];
+        var border_color_set = [];
+        doughnut_chart_data[item].forEach(function (each_data, i) {
+          background_color_set.push(color(Charts.chartColors[Charts.colors_list[i]]).alpha(0.5).rgbString());
+          border_color_set.push(color(Charts.chartColors[Charts.colors_list[i]]));
+        })
+
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: doughnut_chart_labels[item],
+            datasets: [{
+              data: doughnut_chart_data[item],
+              backgroundColor: background_color_set,
+              borderColor: border_color_set
+            }]
+          },
+          elements: {
+            rectangle: {
+              borderWidth: 2,
+            }
+          },
+          options: {
+            responsive: true,
+          }
+        });
+      });
+    };
+
+  });
+
+
+</script>

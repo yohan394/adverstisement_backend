@@ -1,0 +1,5 @@
+{% if settings_list %}
+{% for settings in settings_list%}
+    <option value={{ settings.id }}>{{ settings.title }}</option>
+{% endfor %}
+{% endif %}

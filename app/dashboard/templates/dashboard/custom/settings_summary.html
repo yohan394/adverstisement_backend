@@ -1,0 +1,151 @@
+{% if settings_list %}
+<div class="col-xl-2 col-lg-6">
+    <div class="card card-stats mb-4 mb-xl-0">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">금일 광고 수</h5>
+                    <span class="h2 font-weight-bold mb-0">
+                    {% for settings in settings_list%}
+                        {{ settings.exposed_size }}
+                    {% endfor %}
+                    </span>
+                </div>
+                <div class="col-auto">
+                    <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                        <i class="fa fa-chart-bar"></i>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
+                <span class="text-nowrap">Since last month</span>
+            </p>
+        </div>
+    </div>
+</div>
+<div class="col-xl-2 col-lg-6">
+    <div class="card card-stats mb-4 mb-xl-0">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">진행률</h5>
+                    <span class="h2 font-weight-bold mb-0">
+                    {% for settings in settings_list%}
+                        {{ settings.exposed_size }}/{{settings.target_size}}
+                    {% endfor %}</span>
+                </div>
+                <div class="col-auto">
+                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                        <i class="fa fa-chart-pie"></i>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
+                <span class="text-nowrap">Since last week</span>
+            </p>
+        </div>
+    </div>
+</div>
+<div class="col-xl-2 col-lg-6">
+    <div class="card card-stats mb-4 mb-xl-0">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">연령 타겟 현황</h5>
+                    {% if  target_a.count > 2 %}
+                        <span class="h5 font-weight-bold mb-0">
+                    {% else %}
+                        <span class="h2 font-weight-bold mb-0">
+                    {% endif %}
+                    
+                        {% for age in target_a%}
+                            {{ age.get_age_display }}
+                        {% endfor %}
+                    </span>
+                </div>
+                <div class="col-auto">
+                    <div class="icon icon-shape bg-yellow text-white rounded-circle shadow">
+                        <i class="fa fa-users"></i>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-warning mr-2"><i class="fa fa-arrow-down"></i> 1.10%</span>
+                <span class="text-nowrap">Since yesterday</span>
+            </p>
+        </div>
+    </div>
+</div>
+<div class="col-xl-2 col-lg-6">
+    <div class="card card-stats mb-4 mb-xl-0">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">관심사 타겟 현황</h5>
+                    <span class="h2 font-weight-bold mb-0">
+                        {% for interest in target_i%}
+                            {{ interest.get_interest_display }}
+                        {% endfor %}
+                    </span>
+                </div>
+            </div>
+            <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 12%</span>
+                <span class="text-nowrap">Since last month</span>
+            </p>
+        </div>
+    </div>
+</div>
+<div class="col-xl-2 col-lg-6">
+    <div class="card card-stats mb-4 mb-xl-0">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">지역 타겟 현황</h5>
+                    <span class="h2 font-weight-bold mb-0">
+                        {% for location in target_l%}
+                            {{ location.get_location_display }}
+                        {% endfor %}
+                    </span>
+                </div>
+            </div>
+            <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 12%</span>
+                <span class="text-nowrap">Since last month</span>
+            </p>
+        </div>
+    </div>
+</div>
+<div class="col-xl-2 col-lg-6">
+    <div class="card card-stats mb-4 mb-xl-0">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">성별 타겟 현황</h5>
+                    <span class="h2 font-weight-bold mb-0">
+                        {% for gender in target_g%}
+                            {{ gender.get_gender_display }}
+                        {% endfor %}
+                    </span>
+                </div>
+            </div>
+            <p class="mt-3 mb-0 text-muted text-sm">
+                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 12%</span>
+                <span class="text-nowrap">Since last month</span>
+            </p>
+        </div>
+    </div>
+</div>
+{% else %}
+    <div class="col-xl-12 card card-stats">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">광고 이력이 존재하지 않습니다.</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,92 @@
+{% extends 'index/index.html' %}
+{% load static %}
+{% block head %}
+	<link rel="stylesheet" href="{% static 'index/css/forms/profile/form.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+            <div class="card-profile my-3">
+              <div class="card-body">
+                  <form class="form-profile" method="POST" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      {% for field in form %}
+                        <div class="form-label-group">
+                            <p>
+                                {% if field.name == 'profile_pic' %}
+                                    {{ field.label_tag }}<br>
+                                    <div class="text-center">
+                                        {% if field.value %}
+                                        <img class="profile_preview" src="{{field.value.url }}"
+                                            alt="" style="background-size:cover;width:100%;height:200px;"/>
+                                        {% else %}
+                                        <img class="profile_preview" src="{% static 'index/images/default-user.png' %}"
+                                            alt="" style="background-size:cover;width:100%;height:200px;"/>
+                                        {% endif %}
+                                    </div>
+                                    {{ field }}
+                                {% else %}
+                                    <div>
+                                        {{ field.label_tag }}<br>
+                                        {% if field.help_text %}
+                                            <small style="color: grey">{{ field.help_text }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {{  field }}
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                    <p style="color: red">{{ error }}</p>
+                                {% endfor %}
+                            </p>
+                        </div>
+                    {% endfor %}
+                      <button class="btn btn-lg bg-stormdust btn-block text-uppercase" type="submit">SAVE CHANGES</button>
+                  </form>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascript %}
+<script>
+$(function($form){
+    $('.form-label-group',$form).
+    find('input,textarea').
+    each(function(){
+      let $this = $(this),
+        this_type = $this.attr('type'),
+        this_required = $this.attr('required') === 'required'
+
+      $this.addClass('form-control');
+
+      if(this_type == 'file'){
+        $this.addClass('dropzone');
+        $this.attr('id','id_profile_pic');
+      }
+
+      if(this_required){
+        $this.parent().find('label').css('font-weight','bold');
+      }
+    });
+  }
+  ($('.form-profile'))
+);
+
+$(document).ready(function(){
+    let $form = $('.form-profile'), form = $form[0];
+    $("#id_profile_pic").change(function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('.profile_preview').attr('src', e.target.result);
+            }
+
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+});
+</script>
+{% endblock %}
