@@ -60,7 +60,7 @@ DEVELOPMENT_DATABASE = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
-            'database': 'advertisement',
+            'database': 'advertisement2',
             'user': 'root',
             'password': 'ubicus1!2@',
             'host': '127.0.0.1',
